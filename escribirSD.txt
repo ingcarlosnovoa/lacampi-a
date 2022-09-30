@@ -1,0 +1,64 @@
+// https://forum.arduino.cc/t/conectar-el-modulo-sd-card-con-arduino-mega-2560/420948
+#include <LiquidCrystal.h>
+#include <SPI.h>
+#include <SD.h>
+
+
+const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+
+const int chipSelect = 53;
+int contador = 0;
+int i = 0;
+
+void setup() {
+  lcd.begin(16, 2);
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  Serial.print("Iniciando sd card...");
+  lcd.setCursor(0, 0);
+  lcd.print("Iniciando SD");
+  pinMode(chipSelect,OUTPUT);
+  delay(2000);
+  if (!SD.begin(chipSelect))
+  {
+    Serial.print("fallo lectura de tarjeta");
+    delay(2000);
+    return;
+  }
+  Serial.print("SD card inicializada ok");
+  delay(2000);
+  
+}
+
+void loop() {
+  
+  // put your main code here, to run repeatedly:
+  for(i=0; i<100; i++)
+  {
+    contador ++;
+    sdcard();
+    delay(1000);
+  }
+}
+
+void sdcard() {
+  String dataString = "";
+  dataString += String("Contador");
+  dataString +=",";
+  dataString += String(contador);
+  dataString +=",";
+  File dafile = SD.open("datalog.txt",FILE_WRITE);
+  lcd.setCursor(0, 1);
+  if (dafile) {
+    dafile.print(",");
+    dafile.println(dataString);
+    dafile.close();
+    Serial.println(dataString);
+    lcd.print(dataString);
+  }
+  else {
+    Serial.println("error al abrir datalog.txt");
+  }
+}
